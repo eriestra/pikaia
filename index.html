@@ -1115,7 +1115,7 @@
 - **Split-pane layout** with specification editor on the left (45%) and live preview on the right (55%)
 - **Dark theme** with GitHub-inspired color scheme (background: #0d1117, secondary: #161b22)
 - **Header bar** containing:
-  - PikaIA logo with DNA helix SVG icon
+  - PikaIA colorful gradient logo (PNG image)
   - Toolbar with Export, API Key, and Model selector buttons
   - Auto-save indicator with animated dot
 - **Left panel (Specification)**:
@@ -1127,8 +1127,11 @@
 - **Right panel (Live Preview)**:
   - Panel header with "Extract Spec" button and "Live Preview" title
   - Tab interface with "Preview" and "Source Code" tabs
-  - Preview tab: iframe showing rendered application
+  - Device selector dropdown (Desktop, Tablet, Mobile) for responsive preview
+  - Fullscreen toggle button for immersive preview mode
+  - Preview tab: iframe showing rendered application with device-specific dimensions
   - Source Code tab: readonly textarea showing generated HTML
+- **Fullscreen mode**: Exit button (X icon) appears in top-right when in fullscreen
 - **Modal dialog** for API key configuration with password input
 - **Toast notifications** in bottom-right corner for user feedback
 
@@ -1154,6 +1157,8 @@
 - **Tab Switching**: Toggle between preview iframe and source code textarea
 - **API Key Management**: Modal-based input with localStorage persistence
 - **Model Selection**: Dropdown to choose AI model (GPT-OSS-120B, Claude 3.5 Sonnet, GPT-4 Turbo, Gemini Pro)
+- **Device Preview**: Switch between Desktop (full width), Tablet (768x1024px), and Mobile (375x667px) views
+- **Fullscreen Mode**: Toggle fullscreen preview, press X button or toggle again to exit
 - **Export**: Download rendered HTML as standalone file
 - **Toast Notifications**: Show success/warning/error messages that auto-dismiss after 4 seconds
 - **Button States**: Disable all action buttons during API requests
