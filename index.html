@@ -475,6 +475,20 @@
       box-shadow: 0 0 0 12px var(--bg-tertiary), 0 4px 20px rgba(0, 0, 0, 0.5);
     }
 
+    .preview-viewport.mobile-landscape iframe {
+      width: 667px;
+      height: 375px;
+      border-radius: 12px;
+      box-shadow: 0 0 0 12px var(--bg-tertiary), 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .preview-viewport.tablet-landscape iframe {
+      width: 1024px;
+      height: 768px;
+      border-radius: 12px;
+      box-shadow: 0 0 0 12px var(--bg-tertiary), 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
     .preview-viewport.fullscreen {
       position: fixed;
       top: 0;
@@ -809,6 +823,94 @@
       justify-content: flex-end;
     }
 
+    /* Loading Spinner */
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    /* Loading Overlay */
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(13, 17, 23, 0.85);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      border-radius: 8px;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loading-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 32px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .loading-spinner-large {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--bg-tertiary);
+      border-top-color: var(--accent-primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .loading-text {
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .loading-subtext {
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    /* Button loading state */
+    button.loading {
+      position: relative;
+      color: transparent;
+      pointer-events: none;
+    }
+
+    button.loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
     /* Scrollbar */
     ::-webkit-scrollbar {
       width: 10px;
@@ -980,11 +1082,19 @@
                 </button>
                 <button class="device-option" onclick="setDevice('tablet')">
                   <i data-feather="tablet"></i>
-                  Tablet
+                  Tablet (Portrait)
+                </button>
+                <button class="device-option" onclick="setDevice('tablet-landscape')">
+                  <i data-feather="tablet"></i>
+                  Tablet (Landscape)
                 </button>
                 <button class="device-option" onclick="setDevice('mobile')">
                   <i data-feather="smartphone"></i>
-                  Mobile
+                  Mobile (Portrait)
+                </button>
+                <button class="device-option" onclick="setDevice('mobile-landscape')">
+                  <i data-feather="smartphone"></i>
+                  Mobile (Landscape)
                 </button>
               </div>
             </div>
@@ -997,6 +1107,13 @@
         <div class="preview-viewport" id="previewViewport">
           <iframe id="preview" class="preview-content active"></iframe>
           <textarea id="sourceCode" class="preview-content" readonly></textarea>
+          <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-content">
+              <div class="loading-spinner-large"></div>
+              <div class="loading-text" id="loadingText">Generating app...</div>
+              <div class="loading-subtext" id="loadingSubtext">This may take a few moments</div>
+            </div>
+          </div>
         </div>
         <button class="fullscreen-exit-btn" onclick="toggleFullscreen()" title="Exit Fullscreen">
           <i data-feather="x"></i>
@@ -1351,20 +1468,32 @@
       event.currentTarget.classList.add('active');
 
       // Remove all device classes
-      viewport.classList.remove('mobile', 'tablet', 'desktop');
+      viewport.classList.remove('mobile', 'mobile-landscape', 'tablet', 'tablet-landscape', 'desktop');
 
-      // Apply device class
-      if (device === 'mobile') {
-        viewport.classList.add('mobile');
-        label.textContent = 'Mobile';
-      } else if (device === 'tablet') {
-        viewport.classList.add('tablet');
-        label.textContent = 'Tablet';
-      } else if (device === 'desktop') {
-        viewport.classList.add('desktop');
-        label.textContent = 'Desktop';
-      } else {
-        label.textContent = 'Device';
+      // Apply device class and update label
+      switch(device) {
+        case 'mobile':
+          viewport.classList.add('mobile');
+          label.textContent = 'Mobile';
+          break;
+        case 'mobile-landscape':
+          viewport.classList.add('mobile-landscape');
+          label.textContent = 'Mobile (L)';
+          break;
+        case 'tablet':
+          viewport.classList.add('tablet');
+          label.textContent = 'Tablet';
+          break;
+        case 'tablet-landscape':
+          viewport.classList.add('tablet-landscape');
+          label.textContent = 'Tablet (L)';
+          break;
+        case 'desktop':
+          viewport.classList.add('desktop');
+          label.textContent = 'Desktop';
+          break;
+        default:
+          label.textContent = 'Device';
       }
 
       // Close menu
@@ -1404,6 +1533,32 @@
       document.getElementById('refineBtn').disabled = disabled;
       document.getElementById('extractBtn').disabled = disabled;
       document.getElementById('clearBtn').disabled = disabled;
+    }
+
+    function showLoading(text = 'Generating app...', subtext = 'This may take a few moments') {
+      const overlay = document.getElementById('loadingOverlay');
+      const textEl = document.getElementById('loadingText');
+      const subtextEl = document.getElementById('loadingSubtext');
+
+      textEl.textContent = text;
+      subtextEl.textContent = subtext;
+      overlay.classList.add('active');
+    }
+
+    function hideLoading() {
+      const overlay = document.getElementById('loadingOverlay');
+      overlay.classList.remove('active');
+    }
+
+    function setButtonLoading(buttonId, loading) {
+      const button = document.getElementById(buttonId);
+      if (loading) {
+        button.classList.add('loading');
+        button.disabled = true;
+      } else {
+        button.classList.remove('loading');
+        button.disabled = false;
+      }
     }
 
     function extractHTML(text) {
@@ -1490,6 +1645,8 @@
 
       try {
         disableButtons(true);
+        setButtonLoading('renderBtn', true);
+        showLoading('Generating app...', 'AI is creating your application');
         setStatus('Generating app...');
 
         const { content, duration } = await callLLM(
@@ -1516,10 +1673,14 @@ ${spec}`
         saveToStorage();
 
         setStatus(`App rendered successfully (${duration}s)`);
+        showToast(`App generated in ${duration}s`, 'success');
       } catch (error) {
         setStatus('Error: ' + error.message);
+        showToast('Failed to generate app: ' + error.message, 'error');
         console.error(error);
       } finally {
+        hideLoading();
+        setButtonLoading('renderBtn', false);
         disableButtons(false);
       }
     }
@@ -1543,6 +1704,7 @@ ${spec}`
 
       try {
         disableButtons(true);
+        setButtonLoading('refineBtn', true);
         setStatus('Refining specification...');
 
         const { content, duration } = await callLLM(
@@ -1562,10 +1724,13 @@ Return ONLY the refined specification, nothing else.`
         saveToStorage();
 
         setStatus(`Spec refined in ${duration}s. Click Render to see changes.`);
+        showToast(`Specification refined in ${duration}s`, 'success');
       } catch (error) {
         setStatus('Error: ' + error.message);
+        showToast('Failed to refine spec: ' + error.message, 'error');
         console.error(error);
       } finally {
+        setButtonLoading('refineBtn', false);
         disableButtons(false);
       }
     }
@@ -1589,6 +1754,8 @@ Return ONLY the refined specification, nothing else.`
 
       try {
         disableButtons(true);
+        setButtonLoading('extractBtn', true);
+        showLoading('Extracting specification...', 'Analyzing your application');
         setStatus('Extracting specification...');
 
         const { content, duration } = await callLLM(
@@ -1605,10 +1772,14 @@ ${html}`
         saveToStorage();
 
         setStatus(`Specification extracted in ${duration}s`);
+        showToast(`Specification extracted in ${duration}s`, 'success');
       } catch (error) {
         setStatus('Error: ' + error.message);
+        showToast('Failed to extract spec: ' + error.message, 'error');
         console.error(error);
       } finally {
+        hideLoading();
+        setButtonLoading('extractBtn', false);
         disableButtons(false);
       }
     }
