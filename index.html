@@ -1229,6 +1229,20 @@
     </div>
   </div>
 
+  <!-- Confirmation Modal -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal">
+      <div class="modal-header" id="confirmTitle">Confirm Action</div>
+      <div class="modal-body" id="confirmMessage">
+        Are you sure you want to proceed?
+      </div>
+      <div class="modal-footer">
+        <button class="secondary" onclick="closeConfirmModal(false)">Cancel</button>
+        <button class="danger" onclick="closeConfirmModal(true)" id="confirmButton">Confirm</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
 
@@ -1596,6 +1610,27 @@
 
     function closeAPIKeyModal() {
       document.getElementById('apiKeyModal').classList.remove('active');
+    }
+
+    // Custom confirmation dialog
+    let confirmCallback = null;
+
+    function showConfirm(title, message, confirmText = 'Confirm') {
+      return new Promise((resolve) => {
+        confirmCallback = resolve;
+        document.getElementById('confirmTitle').textContent = title;
+        document.getElementById('confirmMessage').textContent = message;
+        document.getElementById('confirmButton').textContent = confirmText;
+        document.getElementById('confirmModal').classList.add('active');
+      });
+    }
+
+    function closeConfirmModal(confirmed) {
+      document.getElementById('confirmModal').classList.remove('active');
+      if (confirmCallback) {
+        confirmCallback(confirmed);
+        confirmCallback = null;
+      }
     }
 
     function saveAPIKey() {
@@ -2001,22 +2036,36 @@ ${html}`
       }
     }
 
-    function clearAll() {
-      if (confirm('Clear all data including saved spec and rendered app?')) {
+    async function clearAll() {
+      const confirmed = await showConfirm(
+        'Clear All Data',
+        'This will permanently delete your saved specification and rendered app. Are you sure you want to continue?',
+        'Clear All'
+      );
+
+      if (confirmed) {
         localStorage.removeItem(STORAGE_KEYS.spec);
         localStorage.removeItem(STORAGE_KEYS.html);
         document.getElementById('spec').value = '';
         document.getElementById('preview').srcdoc = '';
+        document.getElementById('sourceCode').value = '';
         document.getElementById('feedback').value = '';
         setStatus('All data cleared');
         updateSaveIndicator('Cleared');
+        showToast('All data has been cleared', 'success');
       }
     }
 
-    // Close modal on overlay click
+    // Close modals on overlay click
     document.getElementById('apiKeyModal').addEventListener('click', (e) => {
       if (e.target.id === 'apiKeyModal') {
         closeAPIKeyModal();
+      }
+    });
+
+    document.getElementById('confirmModal').addEventListener('click', (e) => {
+      if (e.target.id === 'confirmModal') {
+        closeConfirmModal(false);
       }
     });
   </script>
