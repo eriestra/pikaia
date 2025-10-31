@@ -24,7 +24,7 @@ If applicable, add screenshots.
 **Environment:**
  - Browser: [e.g. Chrome 120]
  - OS: [e.g. macOS 14]
- - Pikaia version: [e.g. v1.0.0]
+ - PikaIA version: [e.g. v1.0.0]
 
 **Additional context**
 Any other relevant information.

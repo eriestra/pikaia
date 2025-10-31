@@ -1,6 +1,6 @@
-# Contributing to Pikaia
+# Contributing to PikaIA
 
-Thank you for your interest in contributing to Pikaia!
+Thank you for your interest in contributing to PikaIA!
 
 ## How to Contribute
 

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pikaia - Self-Generating App System</title>
+  <title>PikaIA - Self-Generating App System</title>
   <link rel="icon" type="image/png" href="logo.png">
   <script src="https://unpkg.com/feather-icons"></script>
   <style>
@@ -853,8 +853,8 @@
     <!-- Header -->
     <div class="header">
       <div class="logo">
-        <img src="logo.png" alt="Pikaia Logo" class="logo-dna">
-        <h1>Pikaia</h1>
+        <img src="logo.png" alt="PikaIA Logo" class="logo-dna">
+        <h1>PikaIA</h1>
       </div>
       <div class="toolbar">
         <button class="toolbar-btn" onclick="exportHTML()" title="Export HTML">
@@ -994,6 +994,9 @@
           <iframe id="preview" class="preview-content active"></iframe>
           <textarea id="sourceCode" class="preview-content" readonly></textarea>
         </div>
+        <button class="fullscreen-exit-btn" onclick="toggleFullscreen()" title="Exit Fullscreen">
+          <i data-feather="x"></i>
+        </button>
       </div>
     </div>
   </div>
@@ -1106,13 +1109,13 @@
     }
 
     function loadSelfSpec() {
-      const selfSpec = `# Pikaia - Self-Generating App System
+      const selfSpec = `# PikaIA - Self-Generating App System
 
 ## Interface
 - **Split-pane layout** with specification editor on the left (45%) and live preview on the right (55%)
 - **Dark theme** with GitHub-inspired color scheme (background: #0d1117, secondary: #161b22)
 - **Header bar** containing:
-  - Pikaia logo with DNA helix SVG icon
+  - PikaIA logo with DNA helix SVG icon
   - Toolbar with Export, API Key, and Model selector buttons
   - Auto-save indicator with animated dot
 - **Left panel (Specification)**:
@@ -1431,7 +1434,7 @@
         headers: {
           'Authorization': `Bearer ${apiKey}`,
           'HTTP-Referer': window.location.href,
-          'X-Title': 'Pikaia App System',
+          'X-Title': 'PikaIA App System',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({

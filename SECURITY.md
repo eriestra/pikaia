@@ -23,4 +23,4 @@ We'll respond within 48 hours.
 - Never share your API keys
 - Review generated code before using in production
 - Keep your browser up to date
-- Only use Pikaia from trusted sources
+- Only use PikaIA from trusted sources
