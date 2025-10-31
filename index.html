@@ -210,6 +210,75 @@
       box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
     }
 
+    .model-info-btn {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+      padding: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .model-info-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border-color: var(--accent-primary);
+    }
+
+    .model-info-tooltip {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      min-width: 300px;
+      max-width: 400px;
+      z-index: 100;
+      display: none;
+    }
+
+    .model-info-tooltip.active {
+      display: block;
+    }
+
+    .model-info-tooltip h4 {
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .model-info-tooltip p {
+      color: var(--text-secondary);
+      font-size: 12px;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .model-info-tooltip .model-specs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .model-spec-tag {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+    }
+
     /* Main Content */
     .main {
       display: grid;
@@ -972,12 +1041,33 @@
           <i data-feather="key"></i>
           API Key
         </button>
-        <select class="model-select" id="modelSelect" onchange="updateModel()">
-          <option value="openai/gpt-oss-120b">GPT-OSS-120b</option>
-          <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
-          <option value="openai/gpt-4-turbo">GPT-4 Turbo</option>
-          <option value="google/gemini-pro">Gemini Pro</option>
-        </select>
+        <div style="position: relative; display: flex; gap: 4px; align-items: center;">
+          <select class="model-select" id="modelSelect" onchange="updateModel()">
+            <optgroup label="Free Models">
+              <option value="deepseek/deepseek-chat-v3.1:free">DeepSeek V3.1 (Free)</option>
+              <option value="openai/gpt-oss-20b:free">GPT-OSS-20B (Free)</option>
+            </optgroup>
+            <optgroup label="Budget Models (Fast & Cheap)">
+              <option value="openai/gpt-oss-120b" selected>GPT-OSS-120B ($0.04/1M)</option>
+              <option value="qwen/qwen3-coder-flash">Qwen3 Coder Flash ($0.30/1M)</option>
+              <option value="google/gemini-2.5-flash-preview-09-2025">Gemini 2.5 Flash ($0.30/1M)</option>
+              <option value="deepseek/deepseek-chat-v3.1">DeepSeek V3.1 ($0.20/1M)</option>
+            </optgroup>
+            <optgroup label="Premium Coding Models">
+              <option value="qwen/qwen3-coder-plus">Qwen3 Coder Plus ($1.00/1M)</option>
+              <option value="openai/gpt-5-codex">GPT-5 Codex ($1.25/1M)</option>
+              <option value="anthropic/claude-sonnet-4.5">Claude Sonnet 4.5 ($3.00/1M)</option>
+            </optgroup>
+            <optgroup label="General Purpose">
+              <option value="openai/gpt-5">GPT-5 ($1.25/1M)</option>
+              <option value="openai/gpt-5-mini">GPT-5 Mini ($0.25/1M)</option>
+            </optgroup>
+          </select>
+          <button class="model-info-btn" onclick="toggleModelInfo()" title="Model Info">
+            <i data-feather="info"></i>
+          </button>
+          <div class="model-info-tooltip" id="modelInfoTooltip"></div>
+        </div>
         <div class="toolbar-separator"></div>
         <div class="save-indicator" id="saveIndicator">
           <span class="save-dot"></span>
@@ -1145,12 +1235,88 @@
   <script>
     const OPENROUTER_API_KEY = 'YOUR_OPENROUTER_API_KEY_HERE';
 
-    // Model configuration with provider routing
+    // Model configuration
     let currentModel = 'openai/gpt-oss-120b';
-    const PROVIDER_ROUTING = {
-      order: ['Groq', 'Cerebras', 'Fireworks'],
-      allow_fallbacks: true,
-      quantizations: ['fp16', 'bf16']
+
+    // Model information database
+    const MODEL_INFO = {
+      'deepseek/deepseek-chat-v3.1:free': {
+        name: 'DeepSeek V3.1',
+        description: 'Large hybrid reasoning model (671B params, 37B active) with optional thinking mode. Great for coding, tool use, and research tasks.',
+        context: '163K tokens',
+        pricing: 'Free',
+        features: ['Reasoning', 'Tool Calling', 'Code Generation']
+      },
+      'openai/gpt-oss-20b:free': {
+        name: 'GPT-OSS-20B',
+        description: 'Open-weight 21B MoE model from OpenAI. Good for general tasks with low latency.',
+        context: '131K tokens',
+        pricing: 'Free',
+        features: ['General Purpose', 'Fast']
+      },
+      'openai/gpt-oss-120b': {
+        name: 'GPT-OSS-120B',
+        description: 'Open-weight 117B MoE model optimized for reasoning and agentic tasks. Runs on single H100 GPU.',
+        context: '131K tokens',
+        pricing: '$0.04/1M tokens',
+        features: ['Reasoning', 'Tool Use', 'Efficient']
+      },
+      'qwen/qwen3-coder-flash': {
+        name: 'Qwen3 Coder Flash',
+        description: 'Fast and cost-efficient coding agent model. Excellent for autonomous programming with tool calling.',
+        context: '128K tokens',
+        pricing: '$0.30/1M tokens',
+        features: ['Coding', 'Tool Calling', 'Fast']
+      },
+      'google/gemini-2.5-flash-preview-09-2025': {
+        name: 'Gemini 2.5 Flash',
+        description: 'Google\'s workhorse model for advanced reasoning, coding, and mathematics with built-in thinking capabilities.',
+        context: '1M tokens',
+        pricing: '$0.30/1M tokens',
+        features: ['Reasoning', 'Coding', 'Math', 'Large Context']
+      },
+      'deepseek/deepseek-chat-v3.1': {
+        name: 'DeepSeek V3.1',
+        description: 'Same as free version but with guaranteed availability and higher rate limits.',
+        context: '163K tokens',
+        pricing: '$0.20/1M tokens',
+        features: ['Reasoning', 'Tool Calling', 'Reliable']
+      },
+      'qwen/qwen3-coder-plus': {
+        name: 'Qwen3 Coder Plus',
+        description: 'Powerful coding agent specializing in autonomous programming, tool calling, and environment interaction.',
+        context: '128K tokens',
+        pricing: '$1.00/1M tokens',
+        features: ['Coding Expert', 'Tool Calling', 'Autonomous']
+      },
+      'openai/gpt-5-codex': {
+        name: 'GPT-5 Codex',
+        description: 'Specialized GPT-5 variant optimized for software engineering. Excellent for building projects, debugging, and code review.',
+        context: '400K tokens',
+        pricing: '$1.25/1M tokens',
+        features: ['Coding Expert', 'Reasoning', 'Large Context']
+      },
+      'anthropic/claude-sonnet-4.5': {
+        name: 'Claude Sonnet 4.5',
+        description: 'Anthropic\'s most advanced coding model. State-of-the-art on SWE-bench with excellent tool orchestration.',
+        context: '1M tokens',
+        pricing: '$3.00/1M tokens',
+        features: ['Best for Coding', 'Agentic', 'Extended Context']
+      },
+      'openai/gpt-5': {
+        name: 'GPT-5',
+        description: 'OpenAI\'s most advanced model with major improvements in reasoning, code quality, and accuracy.',
+        context: '400K tokens',
+        pricing: '$1.25/1M tokens',
+        features: ['Advanced Reasoning', 'High Quality', 'General Purpose']
+      },
+      'openai/gpt-5-mini': {
+        name: 'GPT-5 Mini',
+        description: 'Smaller, faster version of GPT-5 with great performance for most tasks at lower cost.',
+        context: '400K tokens',
+        pricing: '$0.25/1M tokens',
+        features: ['Fast', 'Cost Effective', 'General Purpose']
+      }
     };
 
     // localStorage keys
@@ -1210,6 +1376,58 @@
     function updateModel() {
       currentModel = document.getElementById('modelSelect').value;
       localStorage.setItem(STORAGE_KEYS.model, currentModel);
+      showToast(`Switched to ${MODEL_INFO[currentModel]?.name || currentModel}`, 'info');
+    }
+
+    function toggleModelInfo() {
+      const tooltip = document.getElementById('modelInfoTooltip');
+      const isActive = tooltip.classList.contains('active');
+
+      if (isActive) {
+        tooltip.classList.remove('active');
+        document.removeEventListener('click', closeModelInfo);
+      } else {
+        updateModelInfo();
+        tooltip.classList.add('active');
+        setTimeout(() => {
+          document.addEventListener('click', closeModelInfo);
+        }, 0);
+      }
+    }
+
+    function closeModelInfo(e) {
+      const tooltip = document.getElementById('modelInfoTooltip');
+      const btn = document.querySelector('.model-info-btn');
+      if (!tooltip.contains(e.target) && !btn.contains(e.target)) {
+        tooltip.classList.remove('active');
+        document.removeEventListener('click', closeModelInfo);
+      }
+    }
+
+    function updateModelInfo() {
+      const tooltip = document.getElementById('modelInfoTooltip');
+      const info = MODEL_INFO[currentModel];
+
+      if (!info) {
+        tooltip.innerHTML = '<p>Model information not available</p>';
+        return;
+      }
+
+      const featureTags = info.features.map(f =>
+        `<span class="model-spec-tag">${f}</span>`
+      ).join('');
+
+      tooltip.innerHTML = `
+        <h4>${info.name}</h4>
+        <p>${info.description}</p>
+        <div class="model-specs">
+          <span class="model-spec-tag">${info.context}</span>
+          <span class="model-spec-tag">${info.pricing}</span>
+        </div>
+        <div class="model-specs">
+          ${featureTags}
+        </div>
+      `;
     }
 
     function loadFromStorage() {
@@ -1608,8 +1826,7 @@
             content: prompt
           }],
           max_tokens: 4000,
-          temperature: 0.7,
-          provider: PROVIDER_ROUTING
+          temperature: 0.7
         })
       });
 
