@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pikaia - Self-Generating App System</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <script src="https://unpkg.com/feather-icons"></script>
+  <style>
+    :root {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #21262d;
+      --border-color: #30363d;
+      --text-primary: #c9d1d9;
+      --text-secondary: #8b949e;
+      --text-muted: #6e7681;
+      --accent-primary: #58a6ff;
+      --accent-hover: #1f6feb;
+      --success: #3fb950;
+      --warning: #d29922;
+      --danger: #f85149;
+      --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg-primary: #ffffff;
+        --bg-secondary: #f6f8fa;
+        --bg-tertiary: #eaeef2;
+        --border-color: #d0d7de;
+        --text-primary: #1f2328;
+        --text-secondary: #656d76;
+        --text-muted: #8c959f;
+        --accent-primary: #0969da;
+        --accent-hover: #0550ae;
+        --success: #1a7f37;
+        --warning: #9a6700;
+        --danger: #cf222e;
+      }
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .container {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .logo h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.5px;
+    }
+
+    .logo-dna {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+      justify-content: flex-end;
+    }
+
+    .toolbar-btn {
+      background: transparent;
+      color: var(--text-secondary);
+      border: none;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 13px;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .toolbar-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .toolbar-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+    }
+
+    /* Feather icon sizing */
+    button svg, .device-btn svg, .preview-action-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2;
+      vertical-align: middle;
+      margin-top: -2px;
+    }
+
+    .toast-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .device-option svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .toolbar-separator {
+      width: 1px;
+      height: 20px;
+      background: var(--border-color);
+      margin: 0 8px;
+    }
+
+    .save-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 6px 10px;
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    .save-indicator.saved {
+      color: var(--success);
+      border-color: var(--success);
+    }
+
+    .save-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+
+    .save-indicator.saved .save-dot {
+      background: var(--success);
+      box-shadow: 0 0 6px var(--success);
+    }
+
+    .model-select {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      transition: all 0.15s ease;
+    }
+
+    .model-select:hover {
+      border-color: var(--accent-primary);
+    }
+
+    .model-select:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+    }
+
+    /* Main Content */
+    .main {
+      display: grid;
+      grid-template-columns: 45% 55%;
+      gap: 0;
+      overflow: hidden;
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      overflow: hidden;
+      gap: 16px;
+    }
+
+    .panel-left {
+      background: var(--bg-primary);
+      border-right: 1px solid var(--border-color);
+    }
+
+    .panel-right {
+      background: var(--bg-secondary);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .panel-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .panel-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .panel-header button {
+      background: var(--accent-primary);
+      color: white;
+      border: 1px solid transparent;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-main);
+    }
+
+    .panel-header button:hover {
+      background: var(--accent-hover);
+    }
+
+    .panel-header button:active {
+      transform: scale(0.98);
+    }
+
+    .panel-header button:disabled {
+      background: var(--bg-tertiary);
+      color: var(--text-muted);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    /* Textarea */
+    textarea {
+      flex: 1;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.6;
+      resize: none;
+      border-radius: 8px;
+      transition: all 0.15s ease;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+    }
+
+    textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* Preview Controls */
+    .preview-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 16px;
+    }
+
+    .preview-tabs {
+      display: flex;
+      gap: 4px;
+    }
+
+    .preview-tab {
+      background: transparent;
+      color: var(--text-secondary);
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+
+    .preview-tab:hover {
+      color: var(--text-primary);
+      background: var(--bg-tertiary);
+    }
+
+    .preview-tab.active {
+      color: var(--text-primary);
+      border-bottom-color: var(--accent-primary);
+    }
+
+    .preview-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+    }
+
+    /* Device Selector */
+    .device-selector {
+      position: relative;
+    }
+
+    .device-btn {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 12px;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-main);
+    }
+
+    .device-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border-color: var(--accent-primary);
+    }
+
+    .device-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 0;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      min-width: max-content;
+      z-index: 100;
+      display: none;
+      overflow: hidden;
+    }
+
+    .device-menu.active {
+      display: block;
+    }
+
+    .device-option {
+      width: 100%;
+      background: transparent;
+      color: var(--text-secondary);
+      border: none;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      text-align: left;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-main);
+    }
+
+    .device-option:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .device-option.active {
+      background: var(--bg-tertiary);
+      color: var(--accent-primary);
+    }
+
+    .preview-action-btn {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+      padding: 6px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-action-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border-color: var(--accent-primary);
+    }
+
+    /* Preview Viewport */
+    .preview-viewport {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-primary);
+      position: relative;
+      overflow: auto;
+    }
+
+    .preview-viewport.desktop iframe {
+      width: 100%;
+      height: 100%;
+      max-width: 1440px;
+    }
+
+    .preview-viewport.tablet iframe {
+      width: 768px;
+      height: 1024px;
+      border-radius: 12px;
+      box-shadow: 0 0 0 12px var(--bg-tertiary), 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .preview-viewport.mobile iframe {
+      width: 375px;
+      height: 667px;
+      border-radius: 12px;
+      box-shadow: 0 0 0 12px var(--bg-tertiary), 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .preview-viewport.fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1000;
+      background: var(--bg-primary);
+      margin: 0;
+    }
+
+    .preview-viewport.fullscreen iframe {
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .fullscreen-exit-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1001;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.15s ease;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .fullscreen-exit-btn:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--accent-primary);
+    }
+
+    .preview-viewport.fullscreen ~ .fullscreen-exit-btn {
+      display: flex;
+    }
+
+    /* Preview Content */
+    .preview-content {
+      flex: 1;
+      display: none;
+    }
+
+    .preview-content.active {
+      display: block;
+    }
+
+    /* Iframe */
+    iframe {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      height: 100%;
+    }
+
+    #sourceCode {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.6;
+      resize: none;
+      border-radius: 8px;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .control-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    input {
+      flex: 1;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 10px 12px;
+      font-size: 13px;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+      font-family: var(--font-main);
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+    }
+
+    input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* Buttons */
+    button {
+      background: var(--accent-primary);
+      color: white;
+      border: 1px solid transparent;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-family: var(--font-main);
+    }
+
+    button:hover {
+      background: var(--accent-hover);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button:disabled {
+      background: var(--bg-tertiary);
+      color: var(--text-muted);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    button.secondary {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+
+    button.secondary:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border-color: var(--accent-primary);
+    }
+
+    button.danger {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid var(--border-color);
+    }
+
+    button.danger:hover {
+      background: var(--danger);
+      color: white;
+      border-color: var(--danger);
+    }
+
+    .status {
+      font-size: 12px;
+      color: var(--text-secondary);
+      padding: 10px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      text-align: center;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .status:empty {
+      display: none;
+    }
+
+    /* Toast Notifications */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 400px;
+    }
+
+    .toast {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideIn 0.2s ease;
+      min-width: 300px;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .toast.fadeOut {
+      animation: fadeOut 0.2s ease forwards;
+    }
+
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        transform: translateX(400px);
+      }
+    }
+
+    .toast-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .toast-icon svg {
+      width: 100%;
+      height: 100%;
+      fill: currentColor;
+    }
+
+    .toast-content {
+      flex: 1;
+      color: var(--text-primary);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .toast.info {
+      border-left: 3px solid var(--accent-primary);
+    }
+
+    .toast.info .toast-icon {
+      color: var(--accent-primary);
+    }
+
+    .toast.success {
+      border-left: 3px solid var(--success);
+    }
+
+    .toast.success .toast-icon {
+      color: var(--success);
+    }
+
+    .toast.warning {
+      border-left: 3px solid var(--warning);
+    }
+
+    .toast.warning .toast-icon {
+      color: var(--warning);
+    }
+
+    .toast.error {
+      border-left: 3px solid var(--danger);
+    }
+
+    .toast.error .toast-icon {
+      color: var(--danger);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      min-width: 400px;
+      max-width: 600px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-header {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+
+    .modal-body {
+      margin-bottom: 20px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-primary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--bg-tertiary);
+      border-radius: 5px;
+      border: 2px solid var(--bg-primary);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--border-color);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .main {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+      }
+
+      .panel-left {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .toolbar {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <img src="logo.png" alt="Pikaia Logo" class="logo-dna">
+        <h1>Pikaia</h1>
+      </div>
+      <div class="toolbar">
+        <button class="toolbar-btn" onclick="exportHTML()" title="Export HTML">
+          <i data-feather="download"></i>
+          Export
+        </button>
+        <div class="toolbar-separator"></div>
+        <button class="toolbar-btn" onclick="switchAPIKey()" title="Switch API Key">
+          <i data-feather="key"></i>
+          API Key
+        </button>
+        <select class="model-select" id="modelSelect" onchange="updateModel()">
+          <option value="openai/gpt-oss-120b">GPT-OSS-120b</option>
+          <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+          <option value="openai/gpt-4-turbo">GPT-4 Turbo</option>
+          <option value="google/gemini-pro">Gemini Pro</option>
+        </select>
+        <div class="toolbar-separator"></div>
+        <div class="save-indicator" id="saveIndicator">
+          <span class="save-dot"></span>
+          <span>Saved</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+      <!-- Left Panel: Specification -->
+      <div class="panel panel-left">
+        <div class="panel-header">
+          <div class="panel-title">Specification</div>
+          <div class="panel-actions">
+            <button onclick="renderApp()" id="renderBtn">
+              <i data-feather="play"></i>
+              Render App
+            </button>
+          </div>
+        </div>
+
+        <textarea id="spec" placeholder="# My App
+
+## Interface
+- List your UI components...
+
+## Behavior
+- Describe how it works...
+
+## Style
+- Define the visual design..."># My Calculator
+
+## Interface
+- Display showing current number (large, centered)
+- Number buttons 0-9 in a grid
+- Operation buttons: +, -, ×, ÷
+- Equals button and Clear button
+- All buttons should be large and easy to tap
+
+## Behavior
+- Clicking numbers appends to display
+- Clicking operation stores the first number
+- Clicking equals calculates and shows result
+- Clear button resets to 0
+- Support keyboard input
+
+## Style
+- Modern, minimal design
+- Purple gradient background
+- Dark theme with white text
+- Grid layout for buttons
+- Rounded corners
+- Box shadows for depth</textarea>
+
+        <div class="controls">
+          <input id="feedback" placeholder="Provide feedback to refine the spec..." />
+
+          <div class="control-group">
+            <button onclick="refineSpec()" id="refineBtn">
+              <i data-feather="refresh-cw"></i>
+              Refine with Feedback
+            </button>
+            <button onclick="clearAll()" id="clearBtn" class="danger" title="Clear All">
+              <i data-feather="trash-2"></i>
+              Clear
+            </button>
+          </div>
+
+          <div class="status" id="status"></div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Preview -->
+      <div class="panel panel-right">
+        <div class="panel-header">
+          <div class="panel-actions">
+            <button onclick="extractSpec()" id="extractBtn">
+              <i data-feather="arrow-left"></i>
+              Extract Spec
+            </button>
+          </div>
+          <div class="panel-title">Live Preview</div>
+        </div>
+
+        <div class="preview-controls">
+          <div class="preview-tabs">
+            <button class="preview-tab active" onclick="switchTab('preview')">Preview</button>
+            <button class="preview-tab" onclick="switchTab('source')">Source Code</button>
+          </div>
+          <div class="preview-actions">
+            <div class="device-selector">
+              <button class="device-btn" onclick="toggleDeviceMenu()" id="deviceBtn">
+                <i data-feather="monitor"></i>
+                <span id="deviceLabel">Desktop</span>
+                <i data-feather="chevron-down"></i>
+              </button>
+              <div class="device-menu" id="deviceMenu">
+                <button class="device-option active" onclick="setDevice('desktop')">
+                  <i data-feather="monitor"></i>
+                  Desktop
+                </button>
+                <button class="device-option" onclick="setDevice('tablet')">
+                  <i data-feather="tablet"></i>
+                  Tablet
+                </button>
+                <button class="device-option" onclick="setDevice('mobile')">
+                  <i data-feather="smartphone"></i>
+                  Mobile
+                </button>
+              </div>
+            </div>
+            <button class="preview-action-btn" onclick="toggleFullscreen()" id="fullscreenBtn" title="Fullscreen">
+              <i data-feather="maximize"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="preview-viewport" id="previewViewport">
+          <iframe id="preview" class="preview-content active"></iframe>
+          <textarea id="sourceCode" class="preview-content" readonly></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for API Key -->
+  <div class="modal-overlay" id="apiKeyModal">
+    <div class="modal">
+      <div class="modal-header">OpenRouter API Key</div>
+      <div class="modal-body">
+        <input type="password" id="apiKeyInput" placeholder="sk-or-..." style="width: 100%; margin-bottom: 12px;">
+        <p style="font-size: 12px; color: var(--text-muted);">
+          Get your API key from <a href="https://openrouter.ai" target="_blank" style="color: var(--accent-primary)">openrouter.ai</a>
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="secondary" onclick="closeAPIKeyModal()">Cancel</button>
+        <button onclick="saveAPIKey()">Save Key</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    const OPENROUTER_API_KEY = 'YOUR_OPENROUTER_API_KEY_HERE';
+
+    // Model configuration with provider routing
+    let currentModel = 'openai/gpt-oss-120b';
+    const PROVIDER_ROUTING = {
+      order: ['Groq', 'Cerebras', 'Fireworks'],
+      allow_fallbacks: true,
+      quantizations: ['fp16', 'bf16']
+    };
+
+    // localStorage keys
+    const STORAGE_KEYS = {
+      spec: 'pikaia_spec',
+      html: 'pikaia_html',
+      apiKey: 'pikaia_openrouter_key',
+      model: 'pikaia_model'
+    };
+
+    let saveTimeout;
+
+    // Toast notification system
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+
+      const icons = {
+        info: '<i data-feather="info"></i>',
+        success: '<i data-feather="check-circle"></i>',
+        warning: '<i data-feather="alert-triangle"></i>',
+        error: '<i data-feather="x-circle"></i>'
+      };
+
+      toast.innerHTML = `
+        <div class="toast-icon">${icons[type] || icons.info}</div>
+        <div class="toast-content">${message}</div>
+      `;
+
+      container.appendChild(toast);
+      feather.replace();
+
+      setTimeout(() => {
+        toast.classList.add('fadeOut');
+        setTimeout(() => toast.remove(), 200);
+      }, 4000);
+    }
+
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      loadFromStorage();
+      setupAutoSave();
+      checkAPIKey();
+      loadSavedModel();
+      feather.replace();
+    });
+
+    function loadSavedModel() {
+      const savedModel = localStorage.getItem(STORAGE_KEYS.model);
+      if (savedModel) {
+        currentModel = savedModel;
+        document.getElementById('modelSelect').value = savedModel;
+      }
+    }
+
+    function updateModel() {
+      currentModel = document.getElementById('modelSelect').value;
+      localStorage.setItem(STORAGE_KEYS.model, currentModel);
+    }
+
+    function loadFromStorage() {
+      const savedSpec = localStorage.getItem(STORAGE_KEYS.spec);
+      if (savedSpec) {
+        document.getElementById('spec').value = savedSpec;
+        updateSaveIndicator('Loaded from storage');
+      } else {
+        // Load the self-spec if no saved spec exists
+        loadSelfSpec();
+      }
+
+      const savedHTML = localStorage.getItem(STORAGE_KEYS.html);
+      if (savedHTML) {
+        document.getElementById('preview').srcdoc = savedHTML;
+        document.getElementById('sourceCode').value = savedHTML;
+      }
+    }
+
+    function loadSelfSpec() {
+      const selfSpec = `# Pikaia - Self-Generating App System
+
+## Interface
+- **Split-pane layout** with specification editor on the left (45%) and live preview on the right (55%)
+- **Dark theme** with GitHub-inspired color scheme (background: #0d1117, secondary: #161b22)
+- **Header bar** containing:
+  - Pikaia logo with DNA helix SVG icon
+  - Toolbar with Export, API Key, and Model selector buttons
+  - Auto-save indicator with animated dot
+- **Left panel (Specification)**:
+  - Panel header with "Specification" title and "Render App" button (blue, prominent)
+  - Large textarea for markdown spec input with monospace font
+  - Feedback input field for iterative refinement
+  - "Refine with Feedback" and "Clear" buttons at bottom
+  - Status message area
+- **Right panel (Live Preview)**:
+  - Panel header with "Extract Spec" button and "Live Preview" title
+  - Tab interface with "Preview" and "Source Code" tabs
+  - Preview tab: iframe showing rendered application
+  - Source Code tab: readonly textarea showing generated HTML
+- **Modal dialog** for API key configuration with password input
+- **Toast notifications** in bottom-right corner for user feedback
+
+## Behavior
+- **On load**: Restore spec, rendered HTML, API key, and model selection from localStorage. If no spec exists, load this self-spec.
+- **Auto-save**: Debounce spec changes by 1 second, then persist to localStorage with visual feedback
+- **Render App**:
+  - Validate spec is not empty
+  - Check for API key, show modal if missing
+  - Send spec to OpenRouter API using selected model
+  - Extract HTML from response (handling code blocks, raw HTML, or fenced snippets)
+  - Display in iframe preview AND source code textarea
+  - Show success message with generation time
+- **Refine with Feedback**:
+  - Validate feedback is provided
+  - Send current spec + feedback to API
+  - Receive refined spec and update editor
+  - Clear feedback input
+- **Extract Spec**:
+  - Validate rendered app exists
+  - Send HTML to API with prompt to generate specification
+  - Update spec editor with extracted markdown
+- **Tab Switching**: Toggle between preview iframe and source code textarea
+- **API Key Management**: Modal-based input with localStorage persistence
+- **Model Selection**: Dropdown to choose AI model (GPT-OSS-120B, Claude 3.5 Sonnet, GPT-4 Turbo, Gemini Pro)
+- **Export**: Download rendered HTML as standalone file
+- **Toast Notifications**: Show success/warning/error messages that auto-dismiss after 4 seconds
+- **Button States**: Disable all action buttons during API requests
+
+## Style
+- **Color Palette**:
+  - Primary background: #0d1117
+  - Secondary background: #161b22
+  - Tertiary background: #21262d
+  - Border color: #30363d
+  - Text primary: #c9d1d9
+  - Text secondary: #8b949e
+  - Accent color: #58a6ff (blue)
+  - Success: #3fb950 (green)
+  - Warning: #d29922 (orange)
+  - Danger: #f85149 (red)
+- **Typography**:
+  - UI font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif
+  - Code font: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace
+  - Base font size: 14px
+- **Layout**:
+  - Grid-based responsive layout with 45/55 split
+  - Consistent 24px padding in panels
+  - 16px gaps between elements
+  - 8px border radius on all inputs and buttons
+  - Smooth 0.15s transitions on interactive elements
+- **Components**:
+  - Buttons: Blue accent primary buttons, secondary transparent with border, danger red
+  - Inputs: Dark background with light border, blue focus ring
+  - Tabs: Underline style with blue accent indicator
+  - Modals: Centered with backdrop blur
+  - Toasts: Slide in from right, color-coded by type
+  - Icons: 16px SVG icons inline with text
+- **Scrollbars**: Custom styled with dark theme
+- **Responsive**: On screens < 1024px, switch to vertical stacking`;
+
+      document.getElementById('spec').value = selfSpec;
+      updateSaveIndicator('Loaded self-spec');
+    }
+
+    function saveToStorage() {
+      const spec = document.getElementById('spec').value;
+      const html = document.getElementById('preview').srcdoc;
+
+      localStorage.setItem(STORAGE_KEYS.spec, spec);
+      if (html) {
+        localStorage.setItem(STORAGE_KEYS.html, html);
+      }
+
+      updateSaveIndicator('Auto-saved', true);
+    }
+
+    function setupAutoSave() {
+      const specTextarea = document.getElementById('spec');
+
+      specTextarea.addEventListener('input', () => {
+        updateSaveIndicator('Saving...');
+
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => {
+          saveToStorage();
+        }, 1000);
+      });
+    }
+
+    function updateSaveIndicator(message, saved = false) {
+      const indicator = document.getElementById('saveIndicator');
+      const textSpan = indicator.querySelector('span:last-child');
+      textSpan.textContent = message;
+      indicator.classList.toggle('saved', saved);
+
+      if (saved) {
+        setTimeout(() => {
+          indicator.classList.remove('saved');
+          textSpan.textContent = 'Saved';
+        }, 2000);
+      }
+    }
+
+    function checkAPIKey() {
+      // Check if we have an API key stored, but don't force the modal on page load
+      // The modal will be shown when user tries to use a feature that requires it
+      const hasKey = OPENROUTER_API_KEY && OPENROUTER_API_KEY !== 'YOUR_OPENROUTER_API_KEY_HERE';
+      const hasSavedKey = localStorage.getItem(STORAGE_KEYS.apiKey);
+
+      if (!hasKey && !hasSavedKey) {
+        // Show a subtle hint in the status
+        setStatus('Configure your API key to start generating apps');
+      }
+    }
+
+    function switchAPIKey() {
+      document.getElementById('apiKeyInput').value = '';
+      document.getElementById('apiKeyModal').classList.add('active');
+    }
+
+    function closeAPIKeyModal() {
+      document.getElementById('apiKeyModal').classList.remove('active');
+    }
+
+    function saveAPIKey() {
+      const key = document.getElementById('apiKeyInput').value.trim();
+      if (key) {
+        localStorage.setItem(STORAGE_KEYS.apiKey, key);
+        closeAPIKeyModal();
+        showToast('API key saved successfully', 'success');
+      } else {
+        showToast('Please enter a valid API key', 'warning');
+      }
+    }
+
+    function exportHTML() {
+      const iframe = document.getElementById('preview');
+      const html = iframe.srcdoc;
+
+      if (!html) {
+        showToast('Please render an app first', 'warning');
+        return;
+      }
+
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'pikaia-app.html';
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('HTML exported successfully', 'success');
+    }
+
+    function openGitHub() {
+      window.open('https://github.com/yourusername/pikaia', '_blank');
+    }
+
+    function switchTab(tab) {
+      const tabs = document.querySelectorAll('.preview-tab');
+      const contents = document.querySelectorAll('.preview-content');
+
+      tabs.forEach(t => t.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active'));
+
+      if (tab === 'preview') {
+        tabs[0].classList.add('active');
+        document.getElementById('preview').classList.add('active');
+        document.getElementById('preview').style.display = 'block';
+        document.getElementById('sourceCode').style.display = 'none';
+      } else {
+        tabs[1].classList.add('active');
+        document.getElementById('sourceCode').classList.add('active');
+        document.getElementById('sourceCode').style.display = 'block';
+        document.getElementById('preview').style.display = 'none';
+      }
+    }
+
+    let currentDevice = 'desktop';
+
+    function toggleDeviceMenu() {
+      const menu = document.getElementById('deviceMenu');
+      menu.classList.toggle('active');
+
+      // Close menu when clicking outside
+      if (menu.classList.contains('active')) {
+        setTimeout(() => {
+          document.addEventListener('click', closeDeviceMenu);
+        }, 0);
+      }
+    }
+
+    function closeDeviceMenu(e) {
+      const menu = document.getElementById('deviceMenu');
+      const btn = document.getElementById('deviceBtn');
+      if (!menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove('active');
+        document.removeEventListener('click', closeDeviceMenu);
+      }
+    }
+
+    function setDevice(device) {
+      currentDevice = device;
+      const viewport = document.getElementById('previewViewport');
+      const options = document.querySelectorAll('.device-option');
+      const label = document.getElementById('deviceLabel');
+
+      // Update active state
+      options.forEach(opt => opt.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+
+      // Remove all device classes
+      viewport.classList.remove('mobile', 'tablet', 'desktop');
+
+      // Apply device class
+      if (device === 'mobile') {
+        viewport.classList.add('mobile');
+        label.textContent = 'Mobile';
+      } else if (device === 'tablet') {
+        viewport.classList.add('tablet');
+        label.textContent = 'Tablet';
+      } else if (device === 'desktop') {
+        viewport.classList.add('desktop');
+        label.textContent = 'Desktop';
+      } else {
+        label.textContent = 'Device';
+      }
+
+      // Close menu
+      document.getElementById('deviceMenu').classList.remove('active');
+      document.removeEventListener('click', closeDeviceMenu);
+    }
+
+    function toggleFullscreen() {
+      const viewport = document.getElementById('previewViewport');
+      const btn = document.getElementById('fullscreenBtn');
+
+      if (viewport.classList.contains('fullscreen')) {
+        viewport.classList.remove('fullscreen');
+        btn.innerHTML = '<i data-feather="maximize"></i>';
+        btn.title = 'Fullscreen';
+      } else {
+        viewport.classList.add('fullscreen');
+        btn.innerHTML = '<i data-feather="minimize"></i>';
+        btn.title = 'Exit Fullscreen';
+      }
+      feather.replace();
+    }
+
+    function getAPIKey() {
+      if (OPENROUTER_API_KEY && OPENROUTER_API_KEY !== 'YOUR_OPENROUTER_API_KEY_HERE') {
+        return OPENROUTER_API_KEY;
+      }
+      return localStorage.getItem(STORAGE_KEYS.apiKey);
+    }
+
+    function setStatus(message) {
+      document.getElementById('status').textContent = message;
+    }
+
+    function disableButtons(disabled) {
+      document.getElementById('renderBtn').disabled = disabled;
+      document.getElementById('refineBtn').disabled = disabled;
+      document.getElementById('extractBtn').disabled = disabled;
+      document.getElementById('clearBtn').disabled = disabled;
+    }
+
+    function extractHTML(text) {
+      const codeBlockMatch = text.match(/```html?\n([\s\S]*?)```/);
+      if (codeBlockMatch) {
+        return codeBlockMatch[1].trim();
+      }
+
+      const htmlMatch = text.match(/<!DOCTYPE html>[\s\S]*<\/html>/i);
+      if (htmlMatch) {
+        return htmlMatch[0].trim();
+      }
+
+      const htmlTagMatch = text.match(/<html[\s\S]*<\/html>/i);
+      if (htmlTagMatch) {
+        return htmlTagMatch[0].trim();
+      }
+
+      if (text.includes('<html') || text.includes('<!DOCTYPE')) {
+        return text.trim();
+      }
+
+      return null;
+    }
+
+    async function callLLM(prompt) {
+      const apiKey = getAPIKey();
+
+      if (!apiKey) {
+        throw new Error('API key not set');
+      }
+
+      const startTime = performance.now();
+
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'HTTP-Referer': window.location.href,
+          'X-Title': 'Pikaia App System',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: currentModel,
+          messages: [{
+            role: 'user',
+            content: prompt
+          }],
+          max_tokens: 4000,
+          temperature: 0.7,
+          provider: PROVIDER_ROUTING
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`API Error: ${error.error?.message || response.status}`);
+      }
+
+      const data = await response.json();
+      const endTime = performance.now();
+      const duration = ((endTime - startTime) / 1000).toFixed(2);
+
+      console.log(`⏱️ LLM call completed in ${duration}s`);
+
+      return { content: data.choices[0].message.content, duration };
+    }
+
+    async function renderApp() {
+      const spec = document.getElementById('spec').value;
+
+      if (!spec.trim()) {
+        showToast('Please write a specification first', 'warning');
+        return;
+      }
+
+      // Check if API key exists
+      const apiKey = getAPIKey();
+      if (!apiKey) {
+        showToast('Please enter your API key to continue', 'warning');
+        switchAPIKey();
+        return;
+      }
+
+      try {
+        disableButtons(true);
+        setStatus('Generating app...');
+
+        const { content, duration } = await callLLM(
+          `Convert this specification into a complete, working single-file HTML app.
+Include all CSS in a <style> tag and all JavaScript in a <script> tag.
+Return ONLY the HTML code, nothing else. Do not include any explanations.
+
+Specification:
+${spec}`
+        );
+
+        const html = extractHTML(content);
+
+        if (!html) {
+          throw new Error('Could not extract valid HTML from response');
+        }
+
+        const iframe = document.getElementById('preview');
+        iframe.srcdoc = html;
+
+        // Update source code tab
+        document.getElementById('sourceCode').value = html;
+
+        saveToStorage();
+
+        setStatus(`App rendered successfully (${duration}s)`);
+      } catch (error) {
+        setStatus('Error: ' + error.message);
+        console.error(error);
+      } finally {
+        disableButtons(false);
+      }
+    }
+
+    async function refineSpec() {
+      const spec = document.getElementById('spec').value;
+      const feedback = document.getElementById('feedback').value;
+
+      if (!feedback.trim()) {
+        showToast('Please provide feedback', 'warning');
+        return;
+      }
+
+      // Check if API key exists
+      const apiKey = getAPIKey();
+      if (!apiKey) {
+        showToast('Please enter your API key to continue', 'warning');
+        switchAPIKey();
+        return;
+      }
+
+      try {
+        disableButtons(true);
+        setStatus('Refining specification...');
+
+        const { content, duration } = await callLLM(
+          `Current specification:
+${spec}
+
+User feedback: ${feedback}
+
+Refine the specification to incorporate this feedback.
+Keep the same clear, structured format with Interface, Behavior, and Style sections.
+Return ONLY the refined specification, nothing else.`
+        );
+
+        document.getElementById('spec').value = content.trim();
+        document.getElementById('feedback').value = '';
+
+        saveToStorage();
+
+        setStatus(`Spec refined in ${duration}s. Click Render to see changes.`);
+      } catch (error) {
+        setStatus('Error: ' + error.message);
+        console.error(error);
+      } finally {
+        disableButtons(false);
+      }
+    }
+
+    async function extractSpec() {
+      const iframe = document.getElementById('preview');
+      const html = iframe.srcdoc;
+
+      if (!html) {
+        showToast('Please render an app first', 'warning');
+        return;
+      }
+
+      // Check if API key exists
+      const apiKey = getAPIKey();
+      if (!apiKey) {
+        showToast('Please enter your API key to continue', 'warning');
+        switchAPIKey();
+        return;
+      }
+
+      try {
+        disableButtons(true);
+        setStatus('Extracting specification...');
+
+        const { content, duration } = await callLLM(
+          `Analyze this HTML app and write a clear, structured specification that describes it.
+Use sections: Interface, Behavior, and Style.
+Return ONLY the specification, nothing else.
+
+HTML App:
+${html}`
+        );
+
+        document.getElementById('spec').value = content.trim();
+
+        saveToStorage();
+
+        setStatus(`Specification extracted in ${duration}s`);
+      } catch (error) {
+        setStatus('Error: ' + error.message);
+        console.error(error);
+      } finally {
+        disableButtons(false);
+      }
+    }
+
+    function clearAll() {
+      if (confirm('Clear all data including saved spec and rendered app?')) {
+        localStorage.removeItem(STORAGE_KEYS.spec);
+        localStorage.removeItem(STORAGE_KEYS.html);
+        document.getElementById('spec').value = '';
+        document.getElementById('preview').srcdoc = '';
+        document.getElementById('feedback').value = '';
+        setStatus('All data cleared');
+        updateSaveIndicator('Cleared');
+      }
+    }
+
+    // Close modal on overlay click
+    document.getElementById('apiKeyModal').addEventListener('click', (e) => {
+      if (e.target.id === 'apiKeyModal') {
+        closeAPIKeyModal();
+      }
+    });
+  </script>
+</body>
+
+</html>
