@@ -1,6 +1,8 @@
-# Pikaia
+# PikaIA
 
 <div align="center">
+
+<img src="logo.png" alt="PikaIA Logo" width="200"/>
 
 **Transform specifications into working applications using AI**
 
@@ -8,15 +10,17 @@ A zero-dependency, single-file tool that bridges the gap between idea and implem
 
 [Get Started](#quick-start) • [Features](#features) • [Examples](#example-specification) • [Documentation](#how-it-works)
 
+**🌐 [Try PikaIA Live](https://eriestra.github.io/pikaia) →**
+
 </div>
 
 ---
 
-## What is Pikaia?
+## What is PikaIA?
 
-Pikaia is an AI-powered development companion that generates fully functional web applications from plain English descriptions. No setup, no framework knowledge, no dependencies—just open a file in your browser and start creating.
+PikaIA is an AI-powered development companion that generates fully functional web applications from plain English descriptions. No setup, no framework knowledge, no dependencies—just open a file in your browser and start creating.
 
-### Why Pikaia?
+### Why PikaIA?
 
 - 🚀 **Instant Prototyping**: Go from idea to working app in seconds
 - 🔄 **Iterative Development**: Refine with natural language feedback
@@ -44,15 +48,15 @@ Pikaia is an AI-powered development companion that generates fully functional we
 ### 1. Get an API Key
 Sign up at [OpenRouter](https://openrouter.ai) and copy your API key
 
-### 2. Launch Pikaia
+### 2. Launch PikaIA
 ```bash
 # Option 1: Download and open
-curl -O https://raw.githubusercontent.com/eriestra/pikaia/main/index.html
+curl -O https://raw.githubusercontent.com/eriestra/pikaIA/main/index.html
 open index.html
 
 # Option 2: Clone the repo
-git clone https://github.com/eriestra/pikaia.git
-cd pikaia
+git clone https://github.com/eriestra/pikaIA.git
+cd pikaIA
 open index.html
 ```
 
@@ -77,7 +81,7 @@ Write Spec → Render → Feedback → Refine
 
 ### Specification Format
 
-Pikaia uses a simple markdown structure with three main sections:
+PikaIA uses a simple markdown structure with three main sections:
 
 ```markdown
 # App Name
@@ -124,7 +128,7 @@ Pikaia uses a simple markdown structure with three main sections:
 
 ## User Interface
 
-Pikaia features a clean, GitHub-inspired dark interface with two main panels:
+PikaIA features a clean, GitHub-inspired dark interface with two main panels:
 
 ### Left Panel: Specification Editor
 - **Markdown Editor**: Write your app specs in structured markdown
@@ -161,7 +165,7 @@ const OPENROUTER_API_KEY = 'YOUR_OPENROUTER_API_KEY_HERE';
 
 ### Model Selection
 
-Pikaia supports multiple AI models via the dropdown selector:
+PikaIA supports multiple AI models via the dropdown selector:
 
 - **GPT-OSS-120B** (default) - Fast, cost-effective
 - **Claude 3.5 Sonnet** - Excellent code quality
@@ -187,10 +191,10 @@ Switch models anytime via the toolbar dropdown. Your selection is saved automati
 
 ### Data Storage
 All data is stored locally in your browser's localStorage:
-- `pikaia_spec`: Your current specification
-- `pikaia_html`: Generated HTML application
-- `pikaia_openrouter_key`: Your API key (if entered at runtime)
-- `pikaia_model`: Your selected AI model
+- `pikaIA_spec`: Your current specification
+- `pikaIA_html`: Generated HTML application
+- `pikaIA_openrouter_key`: Your API key (if entered at runtime)
+- `pikaIA_model`: Your selected AI model
 
 No data is transmitted to any server except OpenRouter API calls for generation.
 
@@ -250,7 +254,7 @@ Generate specifications from existing applications for documentation purposes.
 
 ## Contributing
 
-Pikaia is open source and welcomes contributions!
+PikaIA is open source and welcomes contributions!
 
 **Priority Areas:**
 - Template library and starter specs
@@ -271,19 +275,19 @@ MIT License - See LICENSE file for details
 - [OpenRouter](https://openrouter.ai) - Unified LLM API access
 - Modern web standards and browser APIs
 
-**Named after:** *Pikaia gracilens*, one of the earliest known chordates, symbolizing the evolution from simple specifications to complex applications.
+**Named after:** *PikaIA gracilens*, one of the earliest known chordates, symbolizing the evolution from simple specifications to complex applications.
 
 ## Support
 
-- 🐛 **Report Issues**: [GitHub Issues](https://github.com/eriestra/pikaia/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/eriestra/pikaia/discussions)
-- ⭐ **Star us on GitHub** if you find Pikaia useful!
+- 🐛 **Report Issues**: [GitHub Issues](https://github.com/eriestra/pikaIA/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/eriestra/pikaIA/discussions)
+- ⭐ **Star us on GitHub** if you find PikaIA useful!
 
 ---
 
 <div align="center">
 
-**[⬆ Back to Top](#pikaia)**
+**[⬆ Back to Top](#pikaIA)**
 
 Made with ❤️ for developers who dream in specifications
 
