@@ -134,16 +134,16 @@
 
     /* Feather icon sizing */
     button svg, .device-btn svg, .preview-action-btn svg {
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       stroke-width: 2;
       vertical-align: middle;
       margin-top: -2px;
     }
 
     .toast-icon svg {
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
     }
 
     .device-option svg {
@@ -1026,6 +1026,7 @@
       <div class="logo">
         <img src="logo.png" alt="PikaIA Logo" class="logo-dna">
         <h1>PikaIA</h1>
+        <a href="https://www.producthunt.com/products/pikaia?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-pikaia" target="_blank" style="margin-left: 12px;"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1033074&theme=light&t=1761998189112" alt="PikaIA - Minimal Open Source Vibe Coding Tool | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
       </div>
       <div class="toolbar">
         <button class="toolbar-btn" onclick="exportHTML()" title="Export HTML">
@@ -1469,52 +1470,82 @@
 - **Dark theme** with GitHub-inspired color scheme (background: #0d1117, secondary: #161b22)
 - **Header bar** containing:
   - PikaIA colorful gradient logo (PNG image)
-  - Toolbar with Export, API Key, and Model selector buttons
-  - Auto-save indicator with animated dot
+  - Product Hunt featured badge (250x54px) linking to PikaIA on Product Hunt
+  - Toolbar with Export, GitHub, API Key, Model selector, and Model info buttons
+  - Auto-save indicator with animated dot showing save status
 - **Left panel (Specification)**:
   - Panel header with "Specification" title and "Render App" button (blue, prominent)
   - Large textarea for markdown spec input with monospace font
   - Feedback input field for iterative refinement
   - "Refine with Feedback" and "Clear" buttons at bottom
-  - Status message area
+  - Status message area showing operation results and timing
 - **Right panel (Live Preview)**:
   - Panel header with "Extract Spec" button and "Live Preview" title
   - Tab interface with "Preview" and "Source Code" tabs
-  - Device selector dropdown (Desktop, Tablet, Mobile) for responsive preview
+  - Device selector dropdown with 5 modes: Desktop, Tablet (Portrait), Tablet (Landscape), Mobile (Portrait), Mobile (Landscape)
   - Fullscreen toggle button for immersive preview mode
   - Preview tab: iframe showing rendered application with device-specific dimensions
   - Source Code tab: readonly textarea showing generated HTML
+  - Loading overlay with spinner, status text, and subtext during generation
 - **Fullscreen mode**: Exit button (X icon) appears in top-right when in fullscreen
-- **Modal dialog** for API key configuration with password input
-- **Toast notifications** in bottom-right corner for user feedback
+- **Modal dialogs**:
+  - API key configuration modal with password input and OpenRouter link
+  - Confirmation modal for destructive actions (Clear All)
+- **Model info tooltip**: Appears below model info button showing current model's name, description, context window, pricing, and feature tags
+- **Toast notifications** in bottom-right corner for user feedback (success, warning, error, info)
 
 ## Behavior
-- **On load**: Restore spec, rendered HTML, API key, and model selection from localStorage. If no spec exists, load this self-spec.
-- **Auto-save**: Debounce spec changes by 1 second, then persist to localStorage with visual feedback
+- **On load**: Restore spec, rendered HTML, API key, and model selection from localStorage. If no spec exists, load this self-spec. Replace feather icons.
+- **Auto-save**: Debounce spec changes by 1 second, then persist to localStorage with visual feedback (indicator shows "Saving..." then "Auto-saved")
 - **Render App**:
   - Validate spec is not empty
   - Check for API key, show modal if missing
-  - Send spec to OpenRouter API using selected model
+  - Show loading overlay with "Generating app..." message
+  - Send spec to OpenRouter API using selected model with max_tokens: 4000, temperature: 0.7
   - Extract HTML from response (handling code blocks, raw HTML, or fenced snippets)
   - Display in iframe preview AND source code textarea
-  - Show success message with generation time
+  - Save to localStorage automatically
+  - Show success toast with generation time and update status message
 - **Refine with Feedback**:
   - Validate feedback is provided
-  - Send current spec + feedback to API
+  - Check for API key, show modal if missing
+  - Set button to loading state
+  - Send current spec + feedback to API with refinement prompt
   - Receive refined spec and update editor
-  - Clear feedback input
+  - Clear feedback input and save to localStorage
+  - Show success toast with refinement time
 - **Extract Spec**:
   - Validate rendered app exists
-  - Send HTML to API with prompt to generate specification
+  - Check for API key, show modal if missing
+  - Show loading overlay with "Extracting specification..." message
+  - Send HTML to API with analysis prompt
   - Update spec editor with extracted markdown
-- **Tab Switching**: Toggle between preview iframe and source code textarea
-- **API Key Management**: Modal-based input with localStorage persistence
-- **Model Selection**: Dropdown to choose AI model (GPT-OSS-120B, Claude 3.5 Sonnet, GPT-4 Turbo, Gemini Pro)
-- **Device Preview**: Switch between Desktop (full width), Tablet (768x1024px), and Mobile (375x667px) views
-- **Fullscreen Mode**: Toggle fullscreen preview, press X button or toggle again to exit
-- **Export**: Download rendered HTML as standalone file
-- **Toast Notifications**: Show success/warning/error messages that auto-dismiss after 4 seconds
-- **Button States**: Disable all action buttons during API requests
+  - Save to localStorage automatically
+  - Show success toast with extraction time
+- **Tab Switching**: Toggle between preview iframe and source code textarea, updating display property
+- **API Key Management**:
+  - Modal-based input with password field and OpenRouter.ai link
+  - Persists to localStorage on save
+  - Validates key is not empty before saving
+- **Model Selection**:
+  - Organized dropdown with 4 optgroups: Free Models (2 options), Budget Models (4 options), Premium Coding Models (3 options), General Purpose (2 options)
+  - Total 11 models: DeepSeek V3.1 (Free/Paid), GPT-OSS-20B/120B, Qwen3 Coder Flash/Plus, Gemini 2.5 Flash, GPT-5 Codex, Claude Sonnet 4.5, GPT-5, GPT-5 Mini
+  - Saves selection to localStorage on change
+  - Shows toast notification when model is switched
+- **Model Info**: Click info button to toggle tooltip showing current model's specifications (name, description, context window, pricing, features)
+- **Device Preview**: Switch between 5 modes:
+  - Desktop: full width (max 1440px)
+  - Tablet Portrait: 768x1024px with device frame
+  - Tablet Landscape: 1024x768px with device frame
+  - Mobile Portrait: 375x667px with device frame
+  - Mobile Landscape: 667x375px with device frame
+- **Fullscreen Mode**: Toggle fullscreen preview, press X button or toggle again to exit. Icon changes between maximize/minimize.
+- **GitHub Link**: Opens repository in new tab (https://github.com/eriestra/pikaia)
+- **Export**: Download rendered HTML as standalone file named "pikaia-app.html"
+- **Clear All**: Shows confirmation modal, then clears all localStorage data and resets all fields
+- **Toast Notifications**: Show success/warning/error/info messages that auto-dismiss after 4 seconds with slide-in animation
+- **Button States**: Disable all action buttons during API requests and show loading spinners on active buttons
+- **Click-outside**: Device menu and model info tooltip close when clicking outside
 
 ## Style
 - **Color Palette**:
