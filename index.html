@@ -133,7 +133,9 @@
     }
 
     /* Feather icon sizing */
-    button svg, .device-btn svg, .preview-action-btn svg {
+    button svg,
+    .device-btn svg,
+    .preview-action-btn svg {
       width: 16px;
       height: 16px;
       stroke-width: 2;
@@ -530,32 +532,12 @@
       max-width: 1440px;
     }
 
-    .preview-viewport.tablet iframe {
-      width: 768px;
-      height: 1024px;
-      border-radius: 12px;
-      box-shadow: 0 0 0 12px var(--bg-tertiary), 0 4px 20px rgba(0, 0, 0, 0.5);
-    }
-
     .preview-viewport.mobile iframe {
-      width: 375px;
-      height: 667px;
-      border-radius: 12px;
-      box-shadow: 0 0 0 12px var(--bg-tertiary), 0 4px 20px rgba(0, 0, 0, 0.5);
-    }
-
-    .preview-viewport.mobile-landscape iframe {
-      width: 667px;
-      height: 375px;
-      border-radius: 12px;
-      box-shadow: 0 0 0 12px var(--bg-tertiary), 0 4px 20px rgba(0, 0, 0, 0.5);
-    }
-
-    .preview-viewport.tablet-landscape iframe {
-      width: 1024px;
-      height: 768px;
-      border-radius: 12px;
-      box-shadow: 0 0 0 12px var(--bg-tertiary), 0 4px 20px rgba(0, 0, 0, 0.5);
+      border-radius: 20px;
+      max-width: 365px;
+      max-height: 649px;
+      margin: auto;
+      object-fit: contain;
     }
 
     .preview-viewport.fullscreen {
@@ -574,6 +556,11 @@
       height: 100%;
       border-radius: 0;
       box-shadow: none;
+    }
+
+    .preview-viewport.fullscreen.mobile iframe {
+      border-radius: 20px;
+      box-shadow: 0 0 0 12px var(--bg-tertiary), 0 4px 20px rgba(0, 0, 0, 0.5);
     }
 
     .fullscreen-exit-btn {
@@ -599,8 +586,35 @@
       border-color: var(--accent-primary);
     }
 
-    .preview-viewport.fullscreen ~ .fullscreen-exit-btn {
+    .preview-viewport.fullscreen~.fullscreen-exit-btn {
       display: flex;
+    }
+
+    /* Device controls visible in fullscreen */
+    .fullscreen-controls {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 1001;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .preview-viewport.fullscreen ~ .panel-right .fullscreen-controls {
+      display: flex;
+    }
+
+    body:has(.preview-viewport.fullscreen) .device-selector {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 1001;
+    }
+
+    body:has(.preview-viewport.fullscreen) .device-btn {
+      background: var(--bg-secondary);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     }
 
     /* Preview Content */
@@ -776,6 +790,7 @@
         transform: translateX(400px);
         opacity: 0;
       }
+
       to {
         transform: translateX(0);
         opacity: 1;
@@ -894,17 +909,9 @@
 
     /* Loading Spinner */
     @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .loading-spinner {
-      display: inline-block;
-      width: 14px;
-      height: 14px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     /* Loading Overlay */
@@ -959,27 +966,6 @@
       font-size: 12px;
     }
 
-    /* Button loading state */
-    button.loading {
-      position: relative;
-      color: transparent;
-      pointer-events: none;
-    }
-
-    button.loading::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 14px;
-      height: 14px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-    }
-
     /* Scrollbar */
     ::-webkit-scrollbar {
       width: 10px;
@@ -1026,7 +1012,11 @@
       <div class="logo">
         <img src="logo.png" alt="PikaIA Logo" class="logo-dna">
         <h1>PikaIA</h1>
-        <a href="https://www.producthunt.com/products/pikaia?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-pikaia" target="_blank" style="margin-left: 12px;"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1033074&theme=light&t=1761998189112" alt="PikaIA - Minimal Open Source Vibe Coding Tool | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+        <a href="https://www.producthunt.com/products/pikaia?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-pikaia"
+          target="_blank" style="margin-left: 12px;"><img
+            src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1033074&theme=light&t=1761998189112"
+            alt="PikaIA - Minimal Open Source Vibe Coding Tool | Product Hunt" style="width: 250px; height: 54px;"
+            width="250" height="54" /></a>
       </div>
       <div class="toolbar">
         <button class="toolbar-btn" onclick="exportHTML()" title="Export HTML">
@@ -1162,30 +1152,18 @@
           <div class="preview-actions">
             <div class="device-selector">
               <button class="device-btn" onclick="toggleDeviceMenu()" id="deviceBtn">
-                <i data-feather="monitor"></i>
+                <i data-feather="monitor" id="deviceIcon"></i>
                 <span id="deviceLabel">Desktop</span>
                 <i data-feather="chevron-down"></i>
               </button>
               <div class="device-menu" id="deviceMenu">
-                <button class="device-option active" onclick="setDevice('desktop')">
+                <button class="device-option active" onclick="setDevice('desktop', this)">
                   <i data-feather="monitor"></i>
                   Desktop
                 </button>
-                <button class="device-option" onclick="setDevice('tablet')">
-                  <i data-feather="tablet"></i>
-                  Tablet (Portrait)
-                </button>
-                <button class="device-option" onclick="setDevice('tablet-landscape')">
-                  <i data-feather="tablet"></i>
-                  Tablet (Landscape)
-                </button>
-                <button class="device-option" onclick="setDevice('mobile')">
+                <button class="device-option" onclick="setDevice('mobile', this)">
                   <i data-feather="smartphone"></i>
-                  Mobile (Portrait)
-                </button>
-                <button class="device-option" onclick="setDevice('mobile-landscape')">
-                  <i data-feather="smartphone"></i>
-                  Mobile (Landscape)
+                  Mobile
                 </button>
               </div>
             </div>
@@ -1195,7 +1173,7 @@
           </div>
         </div>
 
-        <div class="preview-viewport" id="previewViewport">
+        <div class="preview-viewport desktop" id="previewViewport">
           <iframe id="preview" class="preview-content active"></iframe>
           <textarea id="sourceCode" class="preview-content" readonly></textarea>
           <div class="loading-overlay" id="loadingOverlay">
@@ -1220,7 +1198,8 @@
       <div class="modal-body">
         <input type="password" id="apiKeyInput" placeholder="sk-or-..." style="width: 100%; margin-bottom: 12px;">
         <p style="font-size: 12px; color: var(--text-muted);">
-          Get your API key from <a href="https://openrouter.ai" target="_blank" style="color: var(--accent-primary)">openrouter.ai</a>
+          Get your API key from <a href="https://openrouter.ai" target="_blank"
+            style="color: var(--accent-primary)">openrouter.ai</a>
         </p>
       </div>
       <div class="modal-footer">
@@ -1482,7 +1461,7 @@
 - **Right panel (Live Preview)**:
   - Panel header with "Extract Spec" button and "Live Preview" title
   - Tab interface with "Preview" and "Source Code" tabs
-  - Device selector dropdown with 5 modes: Desktop, Tablet (Portrait), Tablet (Landscape), Mobile (Portrait), Mobile (Landscape)
+  - Device selector dropdown with 2 modes: Desktop (full width) and Mobile (portrait, 375x667px)
   - Fullscreen toggle button for immersive preview mode
   - Preview tab: iframe showing rendered application with device-specific dimensions
   - Source Code tab: readonly textarea showing generated HTML
@@ -1533,12 +1512,9 @@
   - Saves selection to localStorage on change
   - Shows toast notification when model is switched
 - **Model Info**: Click info button to toggle tooltip showing current model's specifications (name, description, context window, pricing, features)
-- **Device Preview**: Switch between 5 modes:
+- **Device Preview**: Switch between 2 modes:
   - Desktop: full width (max 1440px)
-  - Tablet Portrait: 768x1024px with device frame
-  - Tablet Landscape: 1024x768px with device frame
-  - Mobile Portrait: 375x667px with device frame
-  - Mobile Landscape: 667x375px with device frame
+  - Mobile: 375x667px portrait with device frame
 - **Fullscreen Mode**: Toggle fullscreen preview, press X button or toggle again to exit. Icon changes between maximize/minimize.
 - **GitHub Link**: Opens repository in new tab (https://github.com/eriestra/pikaia)
 - **Export**: Download rendered HTML as standalone file named "pikaia-app.html"
@@ -1741,44 +1717,35 @@
       }
     }
 
-    function setDevice(device) {
+    function setDevice(device, element) {
       currentDevice = device;
       const viewport = document.getElementById('previewViewport');
       const options = document.querySelectorAll('.device-option');
       const label = document.getElementById('deviceLabel');
+      const icon = document.getElementById('deviceIcon');
 
       // Update active state
       options.forEach(opt => opt.classList.remove('active'));
-      event.currentTarget.classList.add('active');
+      if (element) {
+        element.classList.add('active');
+      }
 
       // Remove all device classes
-      viewport.classList.remove('mobile', 'mobile-landscape', 'tablet', 'tablet-landscape', 'desktop');
+      viewport.classList.remove('mobile', 'desktop');
 
-      // Apply device class and update label
-      switch(device) {
-        case 'mobile':
-          viewport.classList.add('mobile');
-          label.textContent = 'Mobile';
-          break;
-        case 'mobile-landscape':
-          viewport.classList.add('mobile-landscape');
-          label.textContent = 'Mobile (L)';
-          break;
-        case 'tablet':
-          viewport.classList.add('tablet');
-          label.textContent = 'Tablet';
-          break;
-        case 'tablet-landscape':
-          viewport.classList.add('tablet-landscape');
-          label.textContent = 'Tablet (L)';
-          break;
-        case 'desktop':
-          viewport.classList.add('desktop');
-          label.textContent = 'Desktop';
-          break;
-        default:
-          label.textContent = 'Device';
+      // Apply device class and update label and icon
+      if (device === 'mobile') {
+        viewport.classList.add('mobile');
+        label.textContent = 'Mobile';
+        icon.setAttribute('data-feather', 'smartphone');
+      } else {
+        viewport.classList.add('desktop');
+        label.textContent = 'Desktop';
+        icon.setAttribute('data-feather', 'monitor');
       }
+
+      // Refresh feather icons to show the updated icon
+      feather.replace();
 
       // Close menu
       document.getElementById('deviceMenu').classList.remove('active');
@@ -1836,13 +1803,7 @@
 
     function setButtonLoading(buttonId, loading) {
       const button = document.getElementById(buttonId);
-      if (loading) {
-        button.classList.add('loading');
-        button.disabled = true;
-      } else {
-        button.classList.remove('loading');
-        button.disabled = false;
-      }
+      button.disabled = loading;
     }
 
     function extractHTML(text) {
