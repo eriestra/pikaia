@@ -322,6 +322,16 @@
       letter-spacing: 0.5px;
     }
 
+    .panel-title.clickable {
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.15s ease;
+    }
+
+    .panel-title.clickable:hover {
+      color: var(--accent-primary);
+    }
+
     .panel-actions {
       display: flex;
       gap: 8px;
@@ -987,19 +997,53 @@
     }
 
     /* Responsive */
+    @media (min-width: 1025px) {
+      .panel-title.clickable {
+        cursor: default;
+        pointer-events: none;
+      }
+
+      .panel-title.clickable:hover {
+        color: var(--text-primary);
+      }
+
+      .panel-left,
+      .panel-right {
+        display: flex !important;
+      }
+    }
+
     @media (max-width: 1024px) {
       .main {
         grid-template-columns: 1fr;
-        grid-template-rows: 1fr 1fr;
+        grid-template-rows: 1fr;
       }
 
       .panel-left {
-        border-right: none;
-        border-bottom: 1px solid var(--border-color);
+        display: none;
       }
 
       .toolbar {
         display: none;
+      }
+
+      .panel-title.clickable {
+        background: transparent;
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+        padding: 8px 14px;
+        border-radius: 6px;
+        display: inline-block;
+      }
+
+      .panel-title.clickable:hover {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+        border-color: var(--accent-primary);
+      }
+
+      .panel-right .panel-header {
+        flex-direction: row-reverse;
       }
     }
   </style>
@@ -1072,7 +1116,7 @@
       <!-- Left Panel: Specification -->
       <div class="panel panel-left">
         <div class="panel-header">
-          <div class="panel-title">Specification</div>
+          <div class="panel-title clickable" id="specTitle" onclick="toggleMobilePanel()">Specification</div>
           <div class="panel-actions">
             <button onclick="renderApp()" id="renderBtn">
               <i data-feather="play"></i>
@@ -1141,7 +1185,7 @@
               Extract Spec
             </button>
           </div>
-          <div class="panel-title">Live Preview</div>
+          <div class="panel-title clickable" id="previewTitle" onclick="toggleMobilePanel()">Live Preview</div>
         </div>
 
         <div class="preview-controls">
@@ -1691,6 +1735,22 @@
         document.getElementById('sourceCode').classList.add('active');
         document.getElementById('sourceCode').style.display = 'block';
         document.getElementById('preview').style.display = 'none';
+      }
+    }
+
+    function toggleMobilePanel() {
+      const panelLeft = document.querySelector('.panel-left');
+      const panelRight = document.querySelector('.panel-right');
+
+      // Toggle visibility
+      if (panelLeft.style.display === 'flex') {
+        // Switch to preview
+        panelLeft.style.display = 'none';
+        panelRight.style.display = 'flex';
+      } else {
+        // Switch to specification
+        panelLeft.style.display = 'flex';
+        panelRight.style.display = 'none';
       }
     }
 
